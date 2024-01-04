@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log Query</title>
+</head>
+<body>
+    <h1>Log Query</h1>
+    <form id="logQueryForm" onsubmit="queryLogs(); return false;" action="http://localhost:8000/query">
+        <label for="level">Level:</label>
+        <input type="text" id="level" name="level" value=""><br>
+
+        <label for="keyword">Keyword:</label>
+        <input type="text" id="keyword" name="keyword" value=""><br>
+
+        <label for="timestamp_from">Timestamp From:</label>
+        <input type="text" id="timestamp_from" name="timestamp_from" value=""><br>
+
+        <label for="timestamp_to">Timestamp To:</label>
+        <input type="text" id="timestamp_to" name="timestamp_to" value=""><br>
+
+        <label for="traceId">Trace ID:</label>
+        <input type="text" id="traceId" name="traceId" value=""><br>
+
+        <button type="submit">Query Logs</button>
+    </form>
+
+    <div id="logResults"></div>
+
+    <script>
+        async function queryLogs() {
+            const level = document.getElementById('level').value;
+            const keyword = document.getElementById('keyword').value;
+            const timestamp_from = document.getElementById('timestamp_from').value;
+            const timestamp_to = document.getElementById('timestamp_to').value;
+            const traceId = document.getElementById('traceId').value;
+
+            const response = await fetch(`http://localhost:8000/query?level=${level}&keyword=${keyword}&timestamp_from=${timestamp_from}&timestamp_to=${timestamp_to}&traceId=${traceId}`);
+            const data = await response.json();
+
+            const logResults = document.getElementById('logResults');
+            logResults.innerHTML = '<h2>Log Results</h2>';
+
+            if (data.logs && data.logs.length > 0) {
+                data.logs.forEach(log => {
+                    const source = log._source;
+                    logResults.innerHTML += `
+                        <p>
+                            Level: ${source.level}<br>
+                            Message: ${source.message}<br>
+                            Resource ID: ${source.resourceId}<br>
+                            Timestamp: ${source.timestamp}<br>
+                            Trace ID: ${source.traceId}<br>
+                            Span ID: ${source.spanId}<br>
+                            Commit: ${source.commit}<br>
+                            Parent Resource ID: ${source.metadata.parentResourceId}
+                        </p>
+                    `;
+                });
+            } else {
+                logResults.innerHTML += '<p>No logs found.</p>';
+            }
+        }
+    </script>
+</body>
+</html>

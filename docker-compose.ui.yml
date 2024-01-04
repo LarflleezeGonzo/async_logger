@@ -1,0 +1,10 @@
+# docker-compose.ui.yml
+version: '3'
+
+services:
+  ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.ui
+    ports:
+      - "8080:80"
